@@ -20,9 +20,7 @@ def main():
     if len(seriesuid) > 0:
         filename = os.path.join("./output", seriesuid + ".mha")
         if os.path.exists(filename):
-            print(f"[dcm2mha] File \"{filename}\" exists")
-            print(f"[dcm2mha] Not saving as MHA")
-            return -1
+            print(f"[dcm2mha] File \"{filename}\" exists, overwriting")
         sitk.WriteImage(image, filename)
         print("[dcm2mha] DICOM saved as MHA")
         return 0

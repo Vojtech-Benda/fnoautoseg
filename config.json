@@ -1,6 +1,4 @@
 {
     "process": "./dcm2mha",
-    "model": "unetCT",
-    "test": "someothertest",
-    "help": "sdff"
+    "unet_name": "unetCT"
 }
