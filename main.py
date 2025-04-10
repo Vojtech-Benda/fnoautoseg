@@ -12,7 +12,7 @@ from watchdog.events import FileSystemEventHandler
 INPUT_DIR_PATH = "./input"
 CONFIG_PATH = "./config.json"
 PROCESSED_PATH = "./processed"
-CHECK_INTERVAL = 20
+CHECK_INTERVAL = 5
 
 def reload_config():
     print("config updated")
@@ -90,29 +90,32 @@ def main():
     # observer.start()
     
     check_value = 0
-    last_dir_size = 0    
+    last_file_count = -1    
     while True:
-        
+        print(f"check: {check_value}")
         if check_value % 5 == 0:
             print("[WATCHER] Idle...")
         
         if check_value >= CHECK_INTERVAL:
             file_count, current_dir_size = get_file_count()
-            if last_dir_size != current_dir_size:
-                print("[WATCHER] No files to process")
-                continue
             
-            print(f"[WATCHER] Found {file_count} files")
+            if file_count == 0:
+                print("No files to process")
             
-            if file_count > 0:
+            if file_count == last_file_count and file_count > 0:
+                print(f"[WATCHER] Found {file_count} files")
                 print(f"[{config.process}] Processing data")
                 process_success = process_data(config)
                 if process_success:
                     print("[WATCHER] Moving files to ./processed")
                     move_files()
+                file_count = 0
+            else:
+                print(f"[WATCHER] Current file count: {file_count}, last file count: {last_file_count}")
+                print("[WATCHER] Waiting for files...")
                 
             check_value = 0
-            last_dir_size = current_dir_size
+            last_file_count = file_count
         
         time.sleep(1)
         check_value += 1
@@ -126,7 +129,7 @@ def move_files():
         src_fp = os.path.join(INPUT_DIR_PATH, f)
         dest_fp = os.path.join(PROCESSED_PATH, f)
         if os.path.exists(dest_fp):
-            print(f"File \"{dest_fp}\" exists, overwriting")
+            print(f"File exists, overwriting: \"{dest_fp}\"")
         shutil.move(src_fp, dest_fp)
     print(f"[WATCHER] Moved {len(files)} to ./processed")
     
